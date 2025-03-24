@@ -631,7 +631,7 @@ cat("Moda posterior combinada:", ifelse(!is.na(moda), moda, "No definida debido 
 -   ¿Qué concluyes de la respuesta anterior? ¿En qué se diferencia este enfoque del análisis de datos clásico o frecuentista?
 
 ::: {#respuesta-21 .callout-note}
-En función de la información previa de que diponemos los resultados varían ligeramente. la densidad de probabilidad de la distribución posterior 2 aumenta. Así mismo también aumenta ligeramente el valor esperado posterior y la moda posterior. La principal diferencia respecto alenfoque frecuentista es que el enfoque bayesiano utiliza las informaciones previas a la vez que los datos observados. De este modo supne un enfoque algo más dinámico pues las actualizaciones de los datos observados se hacen en base a los datos obtenidos previamente. El enfoque frecuentoista sería algo más estático, pues se centra en estimar los datos para una muestra determinada.
+En función de la información previa de que diponemos los resultados varían ligeramente. la densidad de probabilidad de la distribución posterior 2 aumenta. Así mismo también aumenta ligeramente el valor esperado posterior y la moda posterior. La principal diferencia respecto alenfoque frecuentista es que el enfoque bayesiano utiliza las informaciones previas a la vez que los datos observados. De este modo supne un enfoque algo más dinámico pues las actualizaciones de los datos observados se hacen en base a los datos obtenidos previamente. El enfoque frecuentista sería algo más estático, pues se centra en estimar los datos para una muestra determinada.
 :::
 
 # Ejercicio 4
@@ -672,6 +672,30 @@ clase_2 <- tibble(
 -   Determina la verosimilitud y las distribuciones previa y posterior de la media, asumiendo que la varianza de la verosimilitud es la varianza de los datos. Justifica cómo has obtenido los parámetros de la distribución posterior (usa 2 decimales de precisión).
 
 ::: {#respuesta-22 .callout-note}
+```{r Verosimilitud, dist previa y post}
+
+# Unión de datos de ambas clases
+datos <- c(clase_1$tiempo, clase_2$tiempo)
+
+# Parámetros observados
+n <- length(datos)
+media_muestral <- mean(datos)  # Media muestral
+varianza_muestral <- var(datos)  # Varianza muestral
+
+# Parámetros de la distribución previa
+mu_previa <- 247
+var_previa <- 1156
+
+# Cálculo de la distribución posterior
+var_posterior <- 1 / (1 / var_previa + n / varianza_muestral)
+mu_posterior <- var_posterior * (mu_previa / var_previa + n * media_muestral / varianza_muestral)
+
+# Mostrar resultados con dos decimales de precisión
+cat(sprintf("Media Posterior: %.2f\n", mu_posterior))
+cat(sprintf("Varianza Posterior: %.2f\n", var_posterior))
+
+```
+
 :::
 
 ## Estimación
@@ -681,4 +705,60 @@ clase_2 <- tibble(
 -   Representa las distribuciones previa y posterior de la media; considera un eje que cubra 4 desviaciones típicas a cada lado de la media de la distribución previa. Obten el estimador esperado y modal a partir de esta distribución y compáralos con la solución analítica de la pregunta anterior.
 
 ::: {#respuesta-23 .callout-note}
+```{r dist previay post}
+#library(ggplot2)
+
+# Parámetros de la distribución previa
+mu_previa <- 247
+var_previa <- 1156
+sd_previa <- sqrt(var_previa)
+
+# Distribución previa: media y desviación típica
+x_previa <- seq(mu_previa - 4 * sd_previa, mu_previa + 4 * sd_previa, length.out = 500)
+y_previa <- dnorm(x_previa, mean = mu_previa, sd = sd_previa)
+
+# Parámetros de la distribución posterior
+clase_1 <- c(
+  242, 249, 278, 273, 227, 257, 276, 236, 214, 141, 200, 201, 
+  228, 271, 160, 275, 156, 246, 293, 306, 263, 247, 224, 160, 277, 
+  168, 250
+)
+
+clase_2 <- c(
+  195, 176, 237, 258, 226, 254, 292, 212, 215, 298, 235, 244, 
+  144, 227, 166, 194, 261, 187, 224, 233, 180, 167, 193, 282
+)
+datos <- c(clase_1, clase_2)
+media_muestral <- mean(datos)
+varianza_muestral <- var(datos)
+sd_muestral <- sqrt(varianza_muestral)
+
+n <- length(datos)
+
+var_posterior <- 1 / (1 / var_previa + n / varianza_muestral)
+mu_posterior <- var_posterior * (mu_previa / var_previa + n * media_muestral / varianza_muestral)
+sd_posterior <- sqrt(var_posterior)
+
+# Distribución posterior: media y desviación típica
+x_posterior <- seq(mu_posterior - 4 * sd_posterior, mu_posterior + 4 * sd_posterior, length.out = 500)
+y_posterior <- dnorm(x_posterior, mean = mu_posterior, sd = sd_posterior)
+
+# Graficar las distribuciones previa y posterior
+df <- data.frame(
+  x = c(x_previa, x_posterior),
+  y = c(y_previa, y_posterior),
+  tipo = c(rep("Previa", length(x_previa)), rep("Posterior", length(x_posterior)))
+  )
+ggplot(df, aes(x = x, y = y, color = tipo)) +
+  geom_line(size = 1) +
+  labs(
+    title = "Distribuciones Previa y Posterior de la Media",
+    x = "Media",
+    y = "Densidad"
+  ) +
+  theme_minimal() +
+  scale_color_manual(values = c("blue", "red"))
+
+```
+
 :::
