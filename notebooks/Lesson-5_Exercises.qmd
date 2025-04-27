@@ -103,6 +103,26 @@ $$
 -   Utilizando la expresión analítica del modelo, obtén la expresión analítica de la distribución posterior de la media para cada una de las dos clases, con 2 decimales.
 
 ::: {#respuesta-1 .callout-note}
+```{r expresion analítica distribución posterior}
+#clase 1
+sigma2_y1<-var(clase_1$tiempo)
+media_1<-mean(clase_1$tiempo)
+mu_posterior_1 <- (sigma2_y1 * MU_PREVIA + 27 * SIGMA2_PREVIA * media_1) /
+           (sigma2_y1 + 27 * SIGMA2_PREVIA)
+mu_posterior_1 <- round(mu_posterior_1, 2)
+mu_posterior_1
+
+
+#clase 2
+sigma2_y2<-var(clase_2$tiempo)
+media_2<-mean(clase_2$tiempo)
+mu_posterior_2 <- (sigma2_y2 * MU_PREVIA + 24 * SIGMA2_PREVIA * media_2) /
+           (sigma2_y2 + 24 * SIGMA2_PREVIA)
+mu_posterior_2 <- round(mu_posterior_2, 2)
+mu_posterior_2
+
+```
+
 :::
 
 ## Simulación de Monte Carlo
@@ -121,6 +141,18 @@ set.seed(20250318)
 ```
 
 ::: {#respuesta-2 .callout-note}
+```{r muestras distribución posterior}
+sigma_posterior_1<-sigma2_y1* SIGMA2_PREVIA/sigma2_y1+27*SIGMA2_PREVIA
+sigma_posterior_1
+sigma_posterior_2<-sigma2_y2* SIGMA2_PREVIA/sigma2_y1+24*SIGMA2_PREVIA
+sigma_posterior_2
+
+#clase 1
+dist_post_c_1<-rnorm(500, mean = 235, sd = sqrt(32368))
+
+#clase 2
+dist_post_c_2<-rnorm(500, mean = 222, sd = sqrt(28689))
+```
 :::
 
 ## Inferencia con la media de la distribución posterior
@@ -130,6 +162,18 @@ set.seed(20250318)
 -   Con las distribuciones simuladas de la pregunta anterior, estima la media y la varianza de cada distribución. Compara los resultados con los obtenidos en la Pregunta 1.
 
 ::: {#respuesta-3 .callout-note}
+```{r estimaciones}
+ media_c_1<-mean(dist_post_c_1)
+media_c_1
+var_post_c_1<-var(dist_post_c_1)
+var_post_c_1
+
+media_c_2<-mean(dist_post_c_2)
+media_c_2
+var_post_c_2<-var(dist_post_c_2)
+var_post_c_2
+```
+
 :::
 
 ## Tamaño muestral y error estándar de Monte Carlo
@@ -139,6 +183,29 @@ set.seed(20250318)
 -   Calcula el error estándar de Monte Carlo de las medias estimadas por el método de Monte Carlo [@hoff2009, p. 56], y su intervalo al 95% de confianza (p. 57). Asume que las varianzas verdaderas son desconocidas (i.e., utiliza las varianzas obtenidas por el método de Monte Carlo). ¿Cuál es la amplitud de los intervalos? Comprueba si los valores reales (obtenidos analíticamente) están comprendidos en los intervalos
 
 ::: {#respuesta-4 .callout-note}
+```{r error estándar e intervalos de confianza}
+error_estandar_1<-sqrt(var_post_c_1/500)
+error_estandar_1
+
+error_estandar_2<-sqrt(var_post_c_2/500)
+error_estandar_2
+
+IC_sup_1<-235+2*error_estandar_1
+IC_sup_1
+IC_inf_1<-235-2*error_estandar_1
+IC_inf_1
+amplitud_1<-IC_sup_1-IC_inf_1
+amplitud_1
+
+IC_sup_2<-222+2*error_estandar_2
+IC_sup_2
+IC_inf_2<-222-2*error_estandar_2
+IC_inf_2
+amplitud_2<-IC_sup_2-IC_inf_2
+amplitud_2
+```
+Los valores obtenidos analíticamente se encuentran comprendidos dentro de los intervalos
+
 :::
 
 ### Pregunta 5
@@ -146,6 +213,24 @@ set.seed(20250318)
 -   En base a las varianzas obtenidas por el método de Monte Carlo, determina el tamaño muestral de la distribución posterior necesario para alcanzar una precisión de 2 decimales en la estimación de la media de las distribuciones posteriores [@hoff2009, p. 56 ---vas a tener que "despejar" el tamaño de la muestra simulada]. Utiliza el valor mayor de ambas distribuciones para volver a calcular las medias, y comprueba si se alcanza la precisión esperada.
 
 ::: {#respuesta-5 .callout-note}
+($$n$$): $$n = \frac{Var}{E^2}$$.
+```{r tamaño muestral para precisión 2 decimales}
+n_1<-var_post_c_1/0.01
+n_1
+n_2 <-var_post_c_2 / 0.01
+n_2
+
+posterior_1<-rnorm(3107066,mean = 235, sd = sqrt(var_post_c_1))
+
+posterior_2<-rnorm(2852483,mean = 222, sd = sqrt(var_post_c_2))
+
+media_post_1<-mean(posterior_1)
+media_post_1
+media_post_2<-mean(posterior_2)
+media_post_2
+```
+
+
 :::
 
 ## Inferencia de intervalos y probabilidades
@@ -163,6 +248,29 @@ set.seed(20250318)
 Obtén los resultados analíticos con las funciones `qnorm()` y `pnorm()`, y compara ambos.
 
 ::: {#respuesta-6 .callout-note}
+```{r}
+#Intervalos de credibilidad
+quantile(posterior_1, probs=c(0.005,0.995))
+qnorm(c(0.005, 0.995), mean = media_post_1, sd = sqrt(var_post_c_1))
+pnorm(c(0.005, 0.995), mean = media_post_1, sd = sqrt(var_post_c_1))
+quantile(posterior_2, probs=c(0.005,0.995))
+qnorm(c(0.005, 0.995), mean = media_post_2, sd = sqrt(var_post_c_2))
+pnorm(c(0.005, 0.995), mean = media_post_2, sd = sqrt(var_post_c_2))
+
+#Cuartiles distribución posterior
+quantile(posterior_1, probs=c(0.25,0.50,0.75))
+qnorm(c(0.25,0.50,0.75), mean = media_post_1, sd = sqrt(var_post_c_1))
+pnorm(c(0.25,0.50,0.75), mean = media_post_1, sd = sqrt(var_post_c_1))
+quantile(posterior_2, probs=c(0.25,0.50,0.75))
+qnorm(c(0.25,0.50,0.75), mean = media_post_2, sd = sqrt(var_post_c_2))
+pnorm(c(0.25,0.50,0.75), mean = media_post_2, sd = sqrt(var_post_c_2))
+
+#Probabilidad media menor que la población
+pnorm(media_c_1, media_post_1, sd = sqrt(var_post_c_1))
+pnorm(media_c_2, media_post_2, sd = sqrt(var_post_c_2))
+
+```
+Los resultados obtenidos con la función qnorm nos proporciona valores de la distribución, mientras que con la función pnorm obtenemos valores de probabilidad acumulada.
 :::
 
 ## Reflexión sobre el método de Monte Carlo
@@ -172,6 +280,7 @@ Obtén los resultados analíticos con las funciones `qnorm()` y `pnorm()`, y com
 -   ¿Qué opinas del método de Monte Carlo? ¿Te resulta fácil o difícil de aplicar? ¿Qué consideras que aporta respecto de obtener los parámetros de los modelos aplicando las fórmulas analíticas?
 
 ::: {#respuesta-7 .callout-note}
+En principio y dado el niel de complejidad matemático estemétodo parece una aproximación que facilita la aplicación de la inferencia bayesiana. No obstante todavía tengo dudas sobre si una media posterior se convierte en una media anterior una vez que recalculamos una nueva distribución. Creo que la principal aportación de este método es que perite ir reevaluando la distribución en función de nuevas aportaciones de datos, lo que en ciencias sociales y cuando las distribuciones no se ajustan exactamente a las distribuciones teóricas permite ir afinando resultados y las conclusiones/decisiones que se tomen respecto a ellos.
 :::
 
 ## Inferencia con funciones derivadas
@@ -181,6 +290,12 @@ Obtén los resultados analíticos con las funciones `qnorm()` y `pnorm()`, y com
 -   Calcula la probabilidad de que la media de la segunda clase sea superior a la media de la primera clase usando el método de Monte Carlo. ¿Cómo lo harías usando la fórmula analítica? ¿Es más fácil o más difícil?
 
 ::: {#respuesta-8 .callout-note}
+```{r}
+mean(media_post_2>media_post_1)
+
+
+```
+
 :::
 
 ### Pregunta 9
@@ -188,6 +303,12 @@ Obtén los resultados analíticos con las funciones `qnorm()` y `pnorm()`, y com
 -   Las muestras obtenidas para distribución posterior de la media de cada una de las dos clases son independientes. Por lo tanto, debería dar igual en qué orden se hayan muestreado. Utilizando `sample(_vector_)` podemos obtener los valores aleatorizado del vector en un objeto `_vector_`. Comprueba si se cumple que podemos aleatorizar las muestras de una (o ambas) distribuciones posteriores, y que la probabilidad de que las dos clases sean diferentes aún así no cambie.
 
 ::: {#respuesta-9 .callout-note}
+```{r}
+muestra_1<-sample(posterior_1)
+muestra_2<-sample(posterior_2)
+mean(muestra_2>muestra_1)
+```
+
 :::
 
 ## Estimador máximo posterior
@@ -243,6 +364,58 @@ El estimador MAP es `{r} moda`, siendo su densidad `{r} densidad_max`.
 -   Utilizando las muestras posteriores obtenidas en la pregunta 5, calcula los estimadores MAP para las dos clases, y compáralos con los que obtendrías con las fómulas analíticas.
 
 ::: {#respuesta-10 .callout-note}
+```{r}
+#CLASE 1
+densidad_norm_1 <- density(posterior_1) # `density()` aplica el "suavizado"
+
+# Convertimos la densidad en un "tibble" para manejarla más fácilmente 
+densidad_normal_1 <- tibble(
+  x        = densidad_norm_1$x, # `x` == variable aleatoria
+  densidad = densidad_norm_1$y
+)
+
+# Podemos representar la densidad gráficamente, junto con la curva normal:
+densidad_normal_1 |>
+  mutate(dens_analitica = dnorm(x)) |>
+  ggplot(aes(x, densidad)) +
+  geom_line(color = color_defecto) +
+  geom_line(aes(y = dens_analitica), color = PALETA[2])
+
+# Obtenemos el valor de la moda:
+estimador_map_1 <- densidad_normal_1 |> slice(which.max(densidad))
+densidad_max_1  <- estimador_map_1 |> pull(densidad)
+moda_1          <- estimador_map_1 |> pull(x)
+
+estimador_map_1
+densidad_max_1
+moda_1
+
+#CLASE 2
+densidad_norm_2 <- density(posterior_2) # `density()` aplica el "suavizado"
+
+# Convertimos la densidad en un "tibble" para manejarla más fácilmente 
+densidad_normal_2 <- tibble(
+  x        = densidad_norm_2$x, # `x` == variable aleatoria
+  densidad = densidad_norm_2$y
+)
+
+# Podemos representar la densidad gráficamente, junto con la curva normal:
+densidad_normal_2 |>
+  mutate(dens_analitica = dnorm(x)) |>
+  ggplot(aes(x, densidad)) +
+  geom_line(color = color_defecto) +
+  geom_line(aes(y = dens_analitica), color = PALETA[2])
+
+# Obtenemos el valor de la moda:
+estimador_map_2 <- densidad_normal_2 |> slice(which.max(densidad))
+densidad_max_2  <- estimador_map_2 |> pull(densidad)
+moda_2          <- estimador_map_2 |> pull(x)
+
+estimador_map_2
+densidad_max_2
+moda_2
+```
+
 :::
 
 # Ejercicio 2: Distribuciones Gamma
