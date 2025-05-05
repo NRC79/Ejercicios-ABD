@@ -103,7 +103,38 @@ Como en temas anteriores, vamos a utilizar una distribución no informativa para
 
 -   Aproxima la distribución previa de $\theta$ por el método de Monte Carlo de manera que el valor esperado tenga una precisión de 0.01 con el 99% de probabilidad. Comprueba que la media y varianza se aproximan a los valores teóricos y representa la distribución resultante.
 
-::: {#respuesta-1 .callout-note}
+::: {#distribución previa}
+```{r}
+# Parámetros de la distribución Beta
+alpha <- 1
+beta <- 1
+
+# Parámetros de precisión y confianza
+precision <- 0.01
+confianza <- 0.99
+
+# Calcular la varianza teórica de la distribución Beta
+var_teorica <- (alpha * beta) / ((alpha + beta)^2 * (alpha + beta + 1))
+
+# Calcular el número necesario de simulaciones
+z <- qnorm((1 + confianza) / 2)  # Cuantil para nivel de confianza
+n_simulaciones <- ceiling((z^2 * var_teorica) / (precision^2))
+simulaciones <- rbeta(n_simulaciones, alpha, beta)
+
+# Calcular media y varianza empíricas
+media_empirica <- mean(simulaciones)
+varianza_empirica <- var(simulaciones)
+
+# Mostrar resultados
+cat("Número de simulaciones necesarias:", n_simulaciones, "\n")
+cat("Media empírica:", media_empirica, "\n")
+cat("Varianza empírica:", varianza_empirica, "\n")
+# Graficar la distribución resultante
+hist(simulaciones, probability = TRUE, main = "Aproximación Monte Carlo de theta",
+     xlab = expression(theta), col = "yellow", border = "red")
+curve(dbeta(x, alpha, beta), add = TRUE, col = "green", lwd = 2)
+```
+
 :::
 
 ### Pregunta 2
@@ -111,6 +142,26 @@ Como en temas anteriores, vamos a utilizar una distribución no informativa para
 -   A partir de la distribución previa simulada de $\theta$, simula los resultados de pruebas binomiales para la primera muestra del estudio. (Ten en cuenta que debe tener el tamaño muestral correspondiente). Representa la distribución predictiva previa resultante e interprétala.
 
 ::: {#respuesta-2 .callout-note}
+```{r}
+n_muestra <- 22
+n_simulaciones <- 10000  # Número de simulaciones
+theta_simulado <- rbeta(n_simulaciones, alpha, beta)
+# Simular resultados binomiales para cada theta
+resultados_binomiales <- rbinom(n_simulaciones, size = n_muestra, prob = theta_simulado)
+
+# Representar la distribución predictiva previa
+hist(resultados_binomiales, probability = TRUE, breaks = seq(0, n_muestra, by = 1),
+     main = "Distribución Predictiva Previa",
+     xlab = "Número de respuestas 'Sí'",
+     col = "green", border = "darkgreen")
+lines(density(resultados_binomiales, adjust = 1.5), col = "red", lwd = 2)
+
+# Mostrar resumen de resultados
+cat("Resumen de resultados binomiales:\n")
+cat("Media predictiva previa:", mean(resultados_binomiales), "\n")
+cat("Varianza predictiva previa:", var(resultados_binomiales), "\n")
+```
+
 :::
 
 ### Pregunta 3
